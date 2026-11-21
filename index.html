@@ -3744,6 +3744,7 @@ const poems = [
             return fetch('https://api.github.com'+path, opt);
         }
         async function ghDownload() {
+            syncCfgFromInputs();
             setMsg('正在下载…');
             const repo=normalizeRepo(), path=cfg.path.trim()||DEFAULT_PATH;
             let text='';
@@ -3761,6 +3762,7 @@ const poems = [
             setMsg('下载成功，已覆盖本机数据 ✅');
         }
         async function ghUpload() {
+            syncCfgFromInputs();
             if(!cfg.token) throw new Error('请先填写 GitHub Token');
             setMsg('正在上传…');
             const repo=normalizeRepo(), path=cfg.path.trim()||DEFAULT_PATH;
@@ -3788,13 +3790,14 @@ const poems = [
             rd.readAsText(f,'utf-8');
             e.target.value='';
         });
+        function syncCfgFromInputs() {
+            cfg.token=document.getElementById('gh-token').value.trim();
+            cfg.repo=document.getElementById('gh-repo').value.trim()||DEFAULT_REPO;
+            cfg.path=document.getElementById('gh-path').value.trim()||DEFAULT_PATH;
+            saveCfg();
+        }
         ['gh-token','gh-repo','gh-path'].forEach(id=>{
-            document.getElementById(id).addEventListener('change',()=>{
-                cfg.token=document.getElementById('gh-token').value.trim();
-                cfg.repo=document.getElementById('gh-repo').value.trim()||DEFAULT_REPO;
-                cfg.path=document.getElementById('gh-path').value.trim()||DEFAULT_PATH;
-                saveCfg();
-            });
+            document.getElementById(id).addEventListener('input',syncCfgFromInputs);
         });
         document.getElementById('gh-download').addEventListener('click',()=>{ ghDownload().catch(e=>setMsg(e.message,true)); });
         document.getElementById('gh-upload').addEventListener('click',()=>{ ghUpload().catch(e=>setMsg(e.message,true)); });
